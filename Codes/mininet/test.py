@@ -10,6 +10,9 @@ from random import randrange, choice
 from time import sleep, time
 from random import choice
 
+import socket
+import netifaces
+
 class MyTopo(Topo):
     def build(self):
         s1 = self.addSwitch('s1', cls=OVSKernelSwitch, protocols='OpenFlow13')
@@ -127,7 +130,7 @@ def generate_normal_traffic(hosts, h1):
     
     start_time = time()
     j = 0
-    while time() - start_time < 120 and j < 50:  # upper bound to prevent infinite loop
+    while time() - start_time < 45 and j < 50:  # upper bound to prevent infinite loop
         src = choice(hosts)
         dst = ip_generator()
         
@@ -152,6 +155,28 @@ def generate_normal_traffic(hosts, h1):
     h1.cmd("rm -f *.* /home/mininet/Downloads")
     print("--------------------------------------------------------------------------------")  
 
+def get_default_ip():
+    """Fallback method: gets IP used to reach the internet."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
+    except Exception:
+        return "127.0.0.1"
+    finally:
+        s.close()
+
+def get_local_ip():
+    try:
+        iface = 'en0'
+        iface_data = netifaces.ifaddresses(iface)
+        ip = iface_data[netifaces.AF_INET][0]['addr']
+        if ip:
+            return ip
+    except Exception:
+        pass  # If en0 doesn't exist or has no IP, fallback below
+    return get_default_ip()
+
 def startNetwork():
     # Get user input for iterations and traffic pattern
     while True:
@@ -174,7 +199,9 @@ def startNetwork():
     
     # Start network
     topo = MyTopo()
-    c0 = RemoteController('c0', ip='10.200.244.53', port=6653)
+
+    local_ip = get_local_ip()
+    c0 = RemoteController('c0', ip=local_ip, port=6653)
     net = Mininet(topo=topo, link=TCLink, controller=c0)
     net.start()
     

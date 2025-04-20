@@ -5,6 +5,7 @@ Ryu-based SDN application for DDoS detection and mitigation.
 - Trains a RandomForest model at startup with a train/validation split.
 - Predicts incoming traffic type and sets a mitigation flag.
 - Blocks ports exhibiting DDoS traffic patterns.
+- Logs output to both terminal and output.log file.
 """
 from datetime import datetime
 import pandas as pd
@@ -19,6 +20,9 @@ from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
 from ryu.lib import hub
 from ryu.lib.packet import packet, ethernet, ether_types, arp, ipv4, icmp, tcp, udp, in_proto
+
+import logging
+import sys
 
 # Global counter for flow serial numbers
 FLOW_SERIAL_NO = 0
@@ -44,6 +48,26 @@ class MitigationSwitch(app_manager.RyuApp):
         self.mitigation = 0
         # ML model
         self.flow_model = None
+
+        # Configure logger to output to both terminal and file
+        self.logger = logging.getLogger('MitigationSwitch')
+        self.logger.setLevel(logging.INFO)
+        
+        # Clear any existing handlers to avoid duplicates
+        self.logger.handlers = []
+        
+        # Create formatter
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        
+        # Terminal handler
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(formatter)
+        self.logger.addHandler(stream_handler)
+        
+        # File handler
+        file_handler = logging.FileHandler('output.log', mode='w')  # 'w' to overwrite on each run
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(file_handler)
 
         # Start the monitoring thread
         self.monitor_thread = hub.spawn(self._monitor)
@@ -187,10 +211,8 @@ class MitigationSwitch(app_manager.RyuApp):
         for col_idx in [2, 3, 5]:
             df.iloc[:, col_idx] = df.iloc[:, col_idx].astype(str).str.replace('.', '')
 
-        # X = df.iloc[:, :-1].astype('float64').values
-        df = df.drop(df.columns[0], axis=1)  # Drop the first column (timestamp) #dropping experiment
+        df = df.drop(df.columns[0], axis=1)  # Drop the first column (timestamp)
         X = df.iloc[:, :-1].astype('float64').values
-
         y = df.iloc[:, -1].values
 
         # 60% train, 20% val, 20% test
@@ -215,7 +237,6 @@ class MitigationSwitch(app_manager.RyuApp):
             for col_idx in [2, 3, 5]:
                 df.iloc[:, col_idx] = df.iloc[:, col_idx].astype(str).str.replace('.', '')
 
-            # Xp = df.iloc[:, :].astype('float64').values
             df = df.drop(df.columns[0], axis=1)  # Drop the first column (timestamp)
             Xp = df.astype('float64').values
 

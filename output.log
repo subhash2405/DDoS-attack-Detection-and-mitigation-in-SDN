@@ -1,0 +1,23 @@
+2025-04-20 18:53:52,778 - MitigationSwitch - INFO - Flow Training ...
+2025-04-20 18:53:57,724 - MitigationSwitch - INFO - Validation Accuracy: 1.0000
+2025-04-20 18:53:57,734 - MitigationSwitch - INFO - Model training time: 0:00:04.955516
+2025-04-20 18:54:17,763 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:17,763 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:54:22,777 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:22,777 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:54:27,785 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:27,785 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:54:37,796 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:37,796 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:54:42,806 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:42,806 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:54:47,816 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:47,816 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:54:52,828 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:52,828 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:54:57,836 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:54:57,836 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:55:02,846 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:55:02,846 - MitigationSwitch - INFO - Traffic is Legitimate!
+2025-04-20 18:55:07,856 - MitigationSwitch - INFO - ------------------------------------------------------------
+2025-04-20 18:55:07,856 - MitigationSwitch - INFO - Traffic is Legitimate!
