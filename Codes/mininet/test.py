@@ -7,6 +7,8 @@ from mininet.node import OVSKernelSwitch, RemoteController
 from time import sleep
 from datetime import datetime
 from random import randrange, choice
+from time import sleep, time
+from random import choice
 
 class MyTopo(Topo):
     def build(self):
@@ -81,33 +83,35 @@ def generate_ddos_traffic(hosts):
     print("--------------------------------------------------------------------------------")
     print("Performing ICMP (Ping) Flood")  
     print("--------------------------------------------------------------------------------")   
-    src.cmd("timeout 20s hping3 -1 -V -d 120 -w 64 -p 80 --rand-source --flood {}".format(dst))  
-    sleep(100)
+    src.cmd("timeout 12s hping3 -1 -V -d 120 -w 64 -p 80 --rand-source --flood {}".format(dst))  
+    sleep(3)
         
     src = choice(hosts)
     dst = ip_generator()   
     print("--------------------------------------------------------------------------------")
     print("Performing UDP Flood")  
     print("--------------------------------------------------------------------------------")   
-    src.cmd("timeout 20s hping3 -2 -V -d 120 -w 64 --rand-source --flood {}".format(dst))    
-    sleep(100)
+    src.cmd("timeout 12s hping3 -2 -V -d 120 -w 64 --rand-source --flood {}".format(dst))    
+    sleep(3)
     
     src = choice(hosts)
     dst = ip_generator()    
     print("--------------------------------------------------------------------------------")
     print("Performing TCP-SYN Flood")  
     print("--------------------------------------------------------------------------------")
-    src.cmd('timeout 20s hping3 -S -V -d 120 -w 64 -p 80 --rand-source --flood 10.0.0.1')
-    sleep(100)
+    src.cmd('timeout 12s hping3 -S -V -d 120 -w 64 -p 80 --rand-source --flood 10.0.0.1')
+    sleep(3)
     
-    src = choice(hosts)
-    dst = ip_generator()   
-    print("--------------------------------------------------------------------------------")
-    print("Performing LAND Attack")  
-    print("--------------------------------------------------------------------------------")   
-    src.cmd("timeout 20s hping3 -1 -V -d 120 -w 64 --flood -a {} {}".format(dst,dst))
-    sleep(100)  
-    print("--------------------------------------------------------------------------------")
+    # src = choice(hosts)
+    # dst = ip_generator()   
+    # print("--------------------------------------------------------------------------------")
+    # print("Performing LAND Attack")  
+    # print("--------------------------------------------------------------------------------")   
+    # src.cmd("timeout 20s hping3 -1 -V -d 120 -w 64 --flood -a {} {}".format(dst,dst))
+    # sleep(100)  
+    # print("--------------------------------------------------------------------------------")
+
+
 
 def generate_normal_traffic(hosts, h1):
     print("--------------------------------------------------------------------------------")    
@@ -121,17 +125,19 @@ def generate_normal_traffic(hosts, h1):
     for h in hosts:
         h.cmd('cd /home/mininet/Downloads')
     
-    for j in range(10):
+    start_time = time()
+    j = 0
+    while time() - start_time < 120 and j < 50:  # upper bound to prevent infinite loop
         src = choice(hosts)
         dst = ip_generator()
         
         if j < 9:
-            print("generating ICMP traffic between %s and h%s and TCP/UDP traffic between %s and h1" % (src,((dst.split('.'))[3]),src))
+            print("generating ICMP traffic between %s and h%s and TCP/UDP traffic between %s and h1" % (src, ((dst.split('.'))[3]), src))
             src.cmd("ping {} -c 100 &".format(dst))
             src.cmd("iperf -p 5050 -c 10.0.0.1")
             src.cmd("iperf -p 5051 -u -c 10.0.0.1")
         else:
-            print("generating ICMP traffic between %s and h%s and TCP/UDP traffic between %s and h1" % (src,((dst.split('.'))[3]),src))
+            print("generating ICMP traffic between %s and h%s and TCP/UDP traffic between %s and h1" % (src, ((dst.split('.'))[3]), src))
             src.cmd("ping {} -c 100".format(dst))
             src.cmd("iperf -p 5050 -c 10.0.0.1")
             src.cmd("iperf -p 5051 -u -c 10.0.0.1")
@@ -140,7 +146,9 @@ def generate_normal_traffic(hosts, h1):
         src.cmd("wget http://10.0.0.1/index.html")
         print("%s Downloading test.zip from h1" % src)
         src.cmd("wget http://10.0.0.1/test.zip")
-    
+
+        j += 1
+
     h1.cmd("rm -f *.* /home/mininet/Downloads")
     print("--------------------------------------------------------------------------------")  
 
@@ -185,7 +193,6 @@ def startNetwork():
             generate_ddos_traffic(hosts)
         else:
             generate_normal_traffic(hosts, h1)
-        sleep(60)
     
     end_time = datetime.now()
     print(f"\nTotal execution time: {end_time - start_time}")
